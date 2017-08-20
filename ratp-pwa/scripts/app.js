@@ -38,6 +38,7 @@
     }
     app.getSchedule(key, label)
     app.selectedTimetables.push({key: key, label: label})
+    app.saveSelectedTimetables()
     app.toggleAddDialog(false)
   })
 
