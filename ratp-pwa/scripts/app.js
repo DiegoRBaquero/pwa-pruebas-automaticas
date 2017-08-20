@@ -141,8 +141,7 @@
   }
 
   app.saveSelectedTimetables = function () {
-    var selectedTimetables = JSON.stringify(app.selectedTimetables)
-    localStorage.selectedTimetables = selectedTimetables
+    localforage.setItem('selectedTimetables', app.selectedTimetables)
   }
 
   /*
@@ -170,19 +169,25 @@
 
   }
 
-  /************************************************************************
-   *
-   * Code required to start the app
-   *
-   * NOTE: To simplify this codelab, we've used localStorage.
-   *   localStorage is a synchronous API and has serious performance
-   *   implications. It should not be used in production applications!
-   *   Instead, check out IDB (https://www.npmjs.com/package/idb) or
-   *   SimpleDB (https://gist.github.com/inexorabletash/c8069c042b734519680c)
-   ************************************************************************/
+  localforage.getItem('selectedTimetables', function (err, value) {
+    if (err) throw err;
+    if (value !== null) {
+      console.log("Using localforage (IndexedDB) values")
+      app.selectedTimetables = value;
+      value.forEach(timetable => app.getSchedule(timetable.key, timetable.label))
+    } else {
+      console.log("First time, using default")
+      app.getSchedule('metros/1/bastille/A', 'Bastille, Direction La Défense')
+      app.selectedTimetables = [
+        {key: initialStationTimetable.key, label: initialStationTimetable.label}
+      ]
+      app.saveSelectedTimetables();
+    }
+  })
 
-  app.getSchedule('metros/1/bastille/A', 'Bastille, Direction La Défense')
-  app.selectedTimetables = [
-    {key: initialStationTimetable.key, label: initialStationTimetable.label}
-  ]
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker
+      .register('./service-worker.js')
+      .then(function() { console.log('Service Worker Registered'); });
+  }
 })()
