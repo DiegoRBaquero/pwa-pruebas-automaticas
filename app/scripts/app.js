@@ -95,6 +95,7 @@
     }
 
     if (app.isLoading) {
+      window.cardLoadTime = performance.now();
       app.spinner.setAttribute('hidden', true)
       app.container.removeAttribute('hidden')
       app.isLoading = false
@@ -115,6 +116,7 @@
     request.onreadystatechange = function () {
       if (request.readyState === XMLHttpRequest.DONE) {
         if (request.status === 200) {
+          window.apiLoadTime = performance.now();
           var response = JSON.parse(request.response)
           var result = {}
           result.key = key
@@ -123,9 +125,6 @@
           result.schedules = response.result.schedules
           app.updateTimetableCard(result)
         }
-      } else {
-        // Return the initial weather forecast since no data is available.
-        app.updateTimetableCard(initialStationTimetable)
       }
     }
     request.open('GET', url)
@@ -177,6 +176,7 @@
       value.forEach(timetable => app.getSchedule(timetable.key, timetable.label))
     } else {
       console.log("First time, using default")
+      app.updateTimetableCard(initialStationTimetable)
       app.getSchedule('metros/1/bastille/A', 'Bastille, Direction La Défense')
       app.selectedTimetables = [
         {key: initialStationTimetable.key, label: initialStationTimetable.label}
